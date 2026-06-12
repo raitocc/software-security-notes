@@ -4,17 +4,17 @@
 
 ## A. 基础查表题答案
 
-1. A。HTTP 默认不保存跨请求身份状态，登录态需要 Cookie、Session、Token 等机制维护。
+1. A。HTTP 默认不保存跨请求身份状态，登录态需要 Cookie、Session、Token 等机制维护。B HTTP 不一定断开 TCP 连接（有 Keep-Alive）；C HTTP 默认不加密；D HTTP 可以传输各种资源。
 
-2. A。Cookie 常在客户端保存，Session 数据通常在服务端，SessionID 用于关联二者。
+2. A。Cookie 常在客户端保存，Session 数据通常在服务端，SessionID 用于关联二者。B Cookie 可设置过期时间是正确的，但这不是区别；C SessionID 通过 Cookie 传递是正确的；D Session 关闭浏览器后可能失效（取决于配置）。
 
-3. A。OWASP 是 `Open Web Application Security Project`。
+3. A。OWASP 是 `Open Web Application Security Project`。B、C、D 都不是 OWASP 的全称。
 
-4. A。WebShell 是网页脚本形式的后门，可把 HTTP 请求转换成服务器端操作入口。
+4. A。WebShell 是网页脚本形式的后门，可把 HTTP 请求转换成服务器端操作入口。B 浏览器沙箱是安全机制；C 数据库事务日志是存储机制；D 缓存目录是性能优化。
 
-5. A。XSS 的脚本在浏览器执行，SQL 注入改变数据库解释的查询语义。
+5. A。XSS 的脚本在浏览器执行，SQL 注入改变数据库解释的查询语义。B XSS 不攻击数据库索引；C XSS 不依赖上传目录；D 反序列化与 XSS/SQL 注入无关。
 
-6. A。该命令用于枚举指定数据库中的表。
+6. A。该命令用于枚举指定数据库中的表。B 导出数据需要 `--dump`；C 查看日志需要其他工具；D 设置 Cookie 需要其他参数。
 
 7. 对。POST 不显示在 URL 中，但不提供加密，也不能替代鉴权和 CSRF 防护。
 
@@ -34,17 +34,17 @@
 
 ## B. 理解应用题答案
 
-15. A。`expire` 控制生命周期，`path` 和 `domain` 控制 Cookie 发送范围。
+15. A。`expire` 控制生命周期，`path` 和 `domain` 控制 Cookie 发送范围。B `secure` 与数据库无关；C `domain` 与 Session 存储位置无关；D `name` 和 `value` 由服务端设置。
 
-16. A。会话保持攻击的关键是延长已窃取会话的可用时间。
+16. A。会话保持攻击的关键是延长已窃取会话的可用时间。B 存储式 XSS 是脚本注入；C SQL 注入是查询篡改；D 文件包含是路径控制。
 
-17. A。客户端文件名不可信，直接拼路径保存容易带来后缀伪装、路径控制和执行风险。
+17. A。客户端文件名不可信，直接拼路径保存容易带来后缀伪装、路径控制和执行风险。B HTTPS 与文件名无关；C PHP 不会自动消除脚本片段；D 数据库与文件保存无关。
 
-18. A。`htmlspecialchars()` 把特殊字符转义，降低输入被浏览器解释为 HTML/JS 的机会。
+18. A。`htmlspecialchars()` 把特殊字符转义，降低输入被浏览器解释为 HTML/JS 的机会。B 这是 Session 的职责；C 这是 Cookie 的职责；D 这与文件上传无关。
 
-19. A。布尔盲注通过真假条件造成的响应差异推断 SQL 逻辑是否被用户输入影响。
+19. A。布尔盲注通过真假条件造成的响应差异推断 SQL 逻辑是否被用户输入影响。B 图片尺寸与 SQL 注入无关；C Cookie 过期与 SQL 注入无关；D URL 路径与 SQL 注入无关。
 
-20. A。`php://filter` 常用于读取源码并编码，`php://input` 读取原始 POST 请求体。
+20. A。`php://filter` 常用于读取源码并编码，`php://input` 读取原始 POST 请求体。B 这些与 Cookie 设置无关；C 魔术方法触发与伪协议无关；D 这些与浏览器缓存无关。
 
 21. GET 常用于查询，参数在 URL 中；POST 常用于提交，数据在请求体中。二者都可被构造和发送，是否保密依赖 HTTPS，是否授权依赖服务端鉴权，是否防 CSRF 依赖 Token、SameSite 等机制。
 
@@ -80,7 +80,7 @@
 
 36. 应使用参数化查询或预编译语句，把 SQL 结构和参数数据分离。
 
-37. 用户可控数据经过 base64 解码后进入 `unserialize()`，满足“不可信数据参与反序列化”的关键条件。
+37. 用户可控数据经过 base64 解码后进入 `unserialize()`，满足"不可信数据参与反序列化"的关键条件。
 
 38. PHP 反序列化对象依赖运行时已有类；利用通常需要找到魔术方法、可控属性和危险操作之间的调用关系，所以要分析源码。
 
