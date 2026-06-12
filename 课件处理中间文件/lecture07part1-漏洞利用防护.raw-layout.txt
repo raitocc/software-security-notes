@@ -1,0 +1,939 @@
+漏洞利用的防护
+1   覆盖返回地址
+
+2   劫持EIP/RIP
+
+3   跳转到shellcode
+
+4   执行恶意代码
+      核心
+
+
+
+不是修复漏洞，而是让漏洞利用更难
+    问题
+
+
+直接修复漏洞不是更好吗？
+    问题
+
+
+直接修复漏洞不是更好吗？
+
+
+修复漏洞其实是第一优先级
+
+但无法做到所有漏洞都立刻
+    发现并修复
+1 ASLR
+
+
+  地址空间分布随机化ASLR(addressspace layout randomization)是一
+  项通过将系统关键地址随机化,从而使攻击者无法获得需要跳转
+  的精确地址的技术。
+
+
+  Shellcode需要调用一些系统函数才能实现系统功能达到攻击目的，
+  因为这些函数的地址往往是系统DLL（如kernel32. Dll）、可执行文
+  件本身、栈数据或PEB（Process Environment Block，进程环境块）
+  中的固定调用地址，所以为shellcode的调用提供了方便。
+1 ASLR
+
+
+         核心思想：模块地址随机变化
+
+             随机什么？
+           （1）Stack起始地址
+           （2）Heap分配地址
+           （3）DLL加载地址
+           （4）程序代码基址
+1 ASLR
+
+
+         核心思想：模块地址随机变化
+
+             防什么？
+
+                 • ret2libc
+          地址跳转   • ROP
+                 • shellcode跳转
+1 ASLR
+
+
+         核心思想：模块地址随机变化
+
+              如何突破？
+
+            • 信息泄漏
+            • brute force
+            • 非ASLR模块
+1 ASLR
+
+
+          核心思想：模块地址随机变化
+
+         如果地址随机化，CPU如何执行？
+1 ASLR
+
+
+          核心思想：模块地址随机变化
+
+         如果地址随机化，CPU如何执行？
+          CPU只需知道当前进程映射后的虚拟地址
+
+    ASLR随机化后，Loader负责修正地址，CPU只执行修正后地址
+
+         CPU执行的是运行时地址，而非编译时地址
+ 对于ASLR技术，微软从操作系统加载时的地址变化和可执行程序编译时的
+ 编译器选项两个方面进行了实现和完善。
+
+系统加载地址变化
+
+ü ASLR随机化的关键系统地址包括: PE文件(exe文件和dll文件)映像加载地址、堆栈基址、
+  堆地址、PEB和TEB（Thread Environment Block，线程环境块）地址等。
+ü 在Windows Vista上，当程序启动将执行文件加载到内存时，操作系统通过内核模块提供的
+  ASLR功能，在原来映像基址的基础上加上一个随机数作为新的映像基址。
+ü 随机数的取值范围限定为1至254，并保证每个数值随机出现。
+
+编译器选项-DYNAMICBASE
+
+VS 2005及更高版本提供了选项/DYNAMICBASE，使用了该选项之后，编译后的程序每次运
+行时，其内部的栈等结构的地址都会被随机化。
+              实验四：在Windows 7及以后的操作系统里运行下述程序，查看地址变化情
+          况
+#define DLL_NAME "kernel32.dll"
+unsigned long gvar = 0;
+void PrintAddress() {
+              printf("PrintAddress的地址:%p \n", PrintAddress);
+              gvar++;
+}
+int main(){                                                               GetProcAddress函数
+              HINSTANCE handle;
+              handle = LoadLibrary(DLL_NAME);                             可以获得DLL中的函数地址
+              if (!handle) {
+                  printf(" load dll erro !"); exit(0);
+              }
+              printf("Kernel32.dll文件库的地址： 0x%x\n", handle);
+              void *pvAddress = GetProcAddress(handle, "LoadLibraryW");
+              printf("LoadLibrary函数地址：%p \n", pvAddress);
+              PrintAddress();
+              printf("变量gvar的地址：%p \n", &gvar);
+              system("pause");
+              return 0;
+}
+2 GS Stack protection
+
+
+
+     GS Stack Protection技术是一项缓冲区溢出的检测防护技术。VC++编译器
+     中提供了一个/GS编译选项，在使用VC7.0、Visual Studio 2005及后续版
+     本编译时都支持该选项，如选择该选项，编译器针对函数调用和返回时
+     添加保护和检查功能的代码，在函数被调用时，在缓冲区和函数返回地
+     址增加一个32位的随机数security_cookie，在函数返回时，调用检查函数
+     检查security_cookie的值是否有变化。
+2 GS Stack protection
+
+                   为什么也叫stack canary？
+
+
+                                        Canary in a
+                                         coal mine
+
+                                         预警信号
+2 GS Stack protection
+
+
+                         防什么？
+                        覆盖返回地址
+2 GS Stack protection
+
+
+                         防什么？
+                        覆盖返回地址
+
+  插入随机值
+例如，0x3fa912bc
+
+
+       函数进入时，编译器自动插入
+           返回时检查
+2 GS Stack protection
+
+
+
+                        如何突破？
+
+               • 信息泄漏
+               • 非连续写（只修改返回地址，不碰cookie）
+               • 非ret路径利用（如SEH利用 ）
+3   DEP
+
+     数据执行保护DEP (data execution prevention) 技术可以限制内存堆栈区的代
+     码为不可执行状态，从而防范溢出后代码的执行。
+
+    Windows操作系统中，默认情况下将包含执行代码和DLL文件的.text段即代码段的
+    内存区域设置为可执行代码的内存区域。其他的内存区域不包含执行代码，应该
+    不能具有代码执行权限，但是Windows XP及其之前的操作系统，没有对这些内存
+    区域的代码执行进行限制。因此，对于缓冲区溢出攻击，攻击者能够对内存的堆
+    栈或堆的缓冲区进行覆盖操作，并执行写入的shellcode代码。
+
+    启用DEP机制后，DEP机制将这些敏感区域设置不可执行的non-executable标
+    志位，因此在溢出后即使跳转到恶意代码的地址，恶意代码也将无法运行，
+    从而有效地阻止了缓冲区溢出攻击的执行。
+3   DEP
+
+
+          核心思想：数据区不能执行代码
+           • stack
+           • heap    RW   RWX
+           • bss
+3   DEP
+
+
+
+
+          作为shellcode写入栈中
+3   DEP
+
+
+          核心思想：数据区不能执行代码
+            • stack
+            • heap    RW   RWX
+            • bss
+
+
+
+
+          不能执行栈/堆上的shellcode
+3   DEP
+
+
+                       如何突破？
+
+          • ret2libc
+          • ROP（Return Oriented Programming）
+          • VirtualProtect（先改权限再跳转）
+
+
+          重用已有代码，而非注入新代码
+3   DEP
+
+
+
+     DEP分为软件DEP和硬件DEP。硬件DEP需要CPU的支持,需要CPU在页
+     表增加一个保护位NX(no execute)，来控制页面是否可执行。现在CPU
+     一般都支持硬件NX，所以现在的DEP保护机制一般都采用的硬件DEP，
+     对于DEP设置non-executable标志位的内存区域，CPU会添加NX保护位
+     来控制内存区域的代码执行。
+
+     此外，Visual Studio编译器提供了一个链接标志/NXCOMPAT，可以在生成目
+     标应用程序的时候使程序启用DEP保护。
+4   SafeSEH
+
+         SEH
+
+    SEH（Structured Exception Handler）是Windows异常处理机制所采用的重要数据结构链表。
+    程序设计者可以根据自身需要，定义程序发生各种异常时相应的处理函数，保存在SEH中。
+
+
+    通过精心构造，攻击者通过缓冲区溢出覆盖SEH中异常处理函数句柄，将其替换为指向恶意
+    代码shellcode的地址，并触发相应异常，从而使程序流程转向执行恶意代码。
+
+
+       SafeSEH
+
+    SafeSEH就是一项保护SEH函数不被非法利用的技术。微软在编译器中加入了/SafeSEH选项,
+    采用该选项编译的程序将PE文件中所有合法的SEH异常处理函数的地址解析出来制成一张
+    SEH函数表，放在PE文件的数据块中,用于异常处理时候进行匹配检查。
+4   SafeSEH
+
+     在该PE文件被加载时，系统读出该SEH函数表的地址，使用内存中的一个
+     随机数加密，将加密后的SEH函数表地址、模块的基址、模块的大小、合
+     法SEH函数的个数等信息，放入ntdll.dll的SEHIndex结构中。
+
+     在PE文件运行中，如果需要调用异常处理函数，系统会调用加解密函数解
+     密从而获得SEH函数表地址，然后针对程序的每个异常处理函数检查是否
+     在合法的SEH函数表中，如果没有则说明该函数非法，将终止异常处理。
+     接着要检查异常处理句柄是否在栈上，如果在栈上也将停止异常处理。这
+     两个检测可以防止在堆上伪造异常链和把shellcode放置在栈上的情况，最
+     后还要检测异常处理函数句柄的有效性。
+
+
+     从Vista开始，由于系统PE文件在编译时都采用SafeSEH编译选项，因此以
+     前那种通过覆盖异常处理句柄的漏洞利用技术，也就不能正常使用了。
+5   SEHOP
+
+
+    结构化异常处理覆盖保护SEHOP（Structured Exception Handler Overwrite
+    Protection）是微软针对SEH攻击提出的一种安全防护方案。
+
+
+
+     SEH攻击是指通过栈溢出或者其他漏洞，使用精心构造的数据覆盖SEH
+     上面的某个函数或者多个函数，从而控制EIP（控制程序执行流程）。
+5   SEHOP
+
+
+     SEHOP的核心是检测程序栈中的所有SEH结构链表的完整性，来判
+     断应用程序是否受到了SEH攻击。
+
+
+    SEHOP针对下列条件进行检测，包括：
+    SEH结构都必须在栈上，最后一个SEH结构也必须在栈上；
+    所有的SEH结构都必须是4字节对齐的；
+    SEH结构中异常处理函数的句柄handle（即处理函数地址）必须不在栈上；
+    最后一个SEH结构的handle必须是ntdll!FinalExceptionHandler函数F等。
+单选题   1分
+
+
+
+
+      能有效阻止非代码区的植入的恶意代码执行的技术是
+
+
+
+       A   ASLR
+
+       B   GS
+
+       C   SEHOP
+
+       D   DEP
+
+                                提交
+需要说明的是，虽然微软启用了GS、DEP、ASLR、SafeSEH、SEHOP等漏
+洞利用的防护技术，然而攻击者也在陆续发现着其他的漏洞利用手段，突
+破微软的防护技术。用魔高一尺道高一丈来描述两者间在漏洞利用技术上
+的对抗，一点也不为过。
+
+
+        接下来，介绍一些进一步的漏洞利用技术。
+        返回导向编程
+Return-Oriented Programming
+            (ROP)
+           ROP为什么重要？
+                                   低地址
+          ESP
+                  Verify函数栈帧
+
+
+
+注入shellcode     Buffer[0…3]机器码
+                       ……                2
+     1
+
+
+                Buffer[40…43]机器码   覆写为buffer地址
+                      Flag
+          EBP      前栈帧EBP
+                    返回地址
+
+                                   高地址
+ 数据区代码
+  不可执行         ROP为什么重要？
+                                       低地址
+              ESP
+                      Verify函数栈帧
+
+
+
+    注入shellcode     Buffer[0…3]机器码
+                           ……                2
+         1
+
+
+                    Buffer[40…43]机器码   覆写为buffer地址
+                          Flag
+ DEP阻止        EBP      前栈帧EBP
+                        返回地址
+shellcode执行
+                                       高地址
+ROP为什么重要？
+         ROP为什么重要？
+
+
+栈中存的是
+已有指令地址
+
+而非注入指令
+         ROP为什么重要？
+
+
+栈中存的是                绕过DEP
+已有指令地址
+
+而非注入指令
+1   基本思想
+
+         ROP
+
+
+    ROP的全称为Return-oriented programming（返回导向编程）；
+    是一种新型的基于代码复用技术的攻击，它从已有的库或可执行文件中提取指
+    令片段，构建恶意代码。
+1   基本思想
+
+         ROP
+
+
+    ROP的全称为Return-oriented programming（返回导向编程）；
+    是一种新型的基于代码复用技术的攻击，它从已有的库或可执行文件中提取指
+    令片段，构建恶意代码。
+
+      ROP的基本思想
+
+    借助已存在的代码块(也叫配件，Gadget)，这些配件来自程序已经加载的模块；
+    在已加载的模块中找到一些以retn结尾的配件，把这些配件的地址布置在堆栈
+    上, 当控制EIP并返回时候, 程序就会跳去执行这些小配件；
+    这些小配件是在别的模块代码段, 不受DEP的影响。
+    ROP Gadget
+
+程序中已有的一小段指令      pop rdi;
+  通常以ret结尾         ret
+        ROP Gadget
+
+   程序中已有的一小段指令        pop rdi;
+      通常以ret结尾          ret
+
+
+                     从栈中取
+为什么以ret结尾？
+                 下一个地址执行
+ROP链
+ROP链
+
+
+       构成新程序
+对于ROP技术，可以总结为如下三点：
+
+
+
+
+1      ROP通过ROP链（retn）实现有序汇编指令的执行。
+
+
+       ROP链由一个个ROP小配件（Gadget，相当于一个小节点）
+2
+       组成。
+
+
+3      ROP小配件由“目的执行指令+retn指令组成”。
+2    示例      ???????=>表示当前返回地址里包含的指令及跳转到该指令处执行
+
+
+ 示例5-11（指针只执行retn）：初始状
+ 态：即将执行retn命令，此时ESP指向
+ 返回地址，而且返回地址以及后面4个
+ 地址里都通过溢出覆写了多个RETN指                                         ……
+ 令的地址。                                         %&%%'(')**
+                                               %&%%'(')**    !"#$
+
+
+                                !"#$%&'(                             ……
+初始状态，EIP指针指向命令retn        -.I
+                          -.I     %&%%'(')**
+                                                      %&%%'(**+%
+                                                      %&%%'(**+%     !"#$
+ESP -> ???????? => RETN           %&%%'(**+%
+
+      ???????? => RETN            %&%%')"*%%                %&%%')"*%%,,!"#$
+
+      ???????? => RETN
+      ???????? => RETN
+下面来演示“指令+retn”的配件的用法，实现一定的逻辑。示例5-7（指针指向一些指令+retn）：
+
+
+           ESP -> ???????? => POP EAX # RETN
+                 ffffffff => we put this value in EAX
+                 ???????? => INC EAX # RETN
+                 ???????? => XCHG EAX,EDX # RETN
+
+      在这个例子中：
+
+  [1].执行retn之后，EIP指向了指令段“POP EAX #RETN”，ESP指向了高地址中的“0xffffffff”。此时，执
+  行POP EAX，结果是将0xffffffff赋值给EAX；
+  [2].然后执行RETN的时候，EIP指向了“INC EAX # RETN”，ESP指向了下一个高地址。此时，执行INC
+  EAX，这样EAX的值将由0xffffffff变为0；
+  [3].再执行RETN的时候，EIP指向了“XCHG EAX,EDX # RETN”，ESP指向了下一个高地址。此时，执行
+  XCHG EAX,EDX，这样EDX的值就变为0。
+  可见，通过上面的ROP指令段，我们实现了将EDX置0的结果。
+ 通过代码重用
+  打开终端
+  绕过DEP
+system("/bin/sh")
+            来自libc
+
+
+
+
+Buffer溢出覆写已有代码/数据地址
+函数返回跳转执行
+  system
+               没有使用CALL
+              自行压入返回地址
+
+
+
+
+             “/bin/sh”
+可用exit地址代替
+system("/bin/sh")
+      exit()
+           来自libc
+
+
+
+
+栈上的payload明明是我写入的
+  DEP为什么没防住？
+                 来自libc
+
+
+
+      只有数据写入栈中
+0xf7e12420对应libc中system
+ 而libc的.text代码是可执行的
+3   基于ROP的漏洞利用
+
+ROP可以通过一些小配件构建期待的目标指令序列，但是因为它严重依赖内存中
+已存在的代码序列，因此，构建复杂和大规模的代码序列是非常难的。
+在实际应用中，基于ROP编写的代码序列可以利用有限的编码完成下述目标来达
+到攻击的目的：
+
+         调用相关API关闭或绕过DEP保护。相关的API包括SetProcessDEPPlolicy、
+    1    VirtualAlloc、NtSetInformationProcess、VirtualProtect等，比如VirtualProtect函数
+         可以将内存块的属性修改为Executable。
+    2     实现地址跳转，直接转向不受DEP保护的区域里保存的shellcode执行。
+
+         调用相关API将shellcode写入不受DEP保护的可执行内存。进而，配
+    3
+         合基于ROP编写的地址跳转指令，完成漏洞利用。
+单选题   1分
+
+
+
+                 ESP -> ???????? => POP EAX # RETN
+      执行右侧命令后，
+      EDX寄存器值为         0x00000001
+                       ???????? => ADD EAX, 2 # RETN
+                       ???????? => XCHG EAX,EDX # RETN
+       A   0
+
+       B   1
+
+       C   2
+
+       D   3
+
+                                             提交
+知识点七：地址定位技术
+根据软件漏洞触发条件的不同，内存给调用函数分配内存的
+方式不同，shellcode的植入地址也不相同。下面根据
+shellcode代码不同的定位方式，介绍三种漏洞利用技术。
+1   静态shellcode地址的利用技术
+
+
+     如果存在溢出漏洞的程序，是一个操作系统每次启动都要加载的程序，操
+     作系统启动时为其分配的内存地址一般是固定的，则函数调用时分配的栈
+     帧地址也是固定的。
+
+
+
+    这种情况下，溢出后写入栈帧的shellcode代码其内存地址也是静态不变的，所
+    以可以直接将shellcode代码在栈帧中的静态地址覆盖原有返回地址。在函数返
+    回时，通过新的返回地址指向shellcode代码地址，从而执行shellcode代码。
+在shellcode为静态地址时，缓冲区溢出前后内存中栈帧的变化示意图参见下图。
+
+
+    esp             esp
+                                       低
+           局部变量n           Shellcode
+            ……             Shellcode
+
+           局部变量1           Shellcode
+    ebp   前一个栈帧指针   ebp    Shellcode
+
+           返回地址           覆盖后的返回地址
+
+            实参1             实参1
+            ……               ……
+
+            实参n             实参n
+             ……              ……
+
+                                       高
+           溢出前              溢出后
+2   基于跳板指令的地址定位技术
+
+
+
+    有些软件的漏洞存在于某些动态链接库中，它们在进程运行时被动态加载，
+    因而在下一次被重新装载到内存中时，其在内存中的栈帧地址是动态变化的，
+    则植入的shellcode代码在内存中的起始地址也是变化的。此外，如果在使用
+    ASLR技术的操作系统中，地址会因为引入的随机数每次发生变化。
+
+
+
+    此时，需要让覆盖返回地址后新写入的返回地址能够自动定位到shellcode的起始地址。
+为了解决这个问题，可以利用esp寄存器的特性实现：
+p 在函数调用结束后，被调用函数的栈帧被释放，esp寄存器中的栈顶指针
+ 指向返回地址在内存高地址方向的相邻位置。
+p 可见，通过esp寄存器，可以准确定位返回地址所在的位置。
+
+
+ 利用这种特性，可以实现对shellcode的动态定位，具体步骤如下：
+
+
+第一步，找到内存中任意一个汇编指令jmp esp，这条指令执行后可跳转到
+esp寄存器保存的地址，下面准备在溢出后将这条指令的地址覆盖返回地址。
+第二步，设计好缓冲区溢出漏洞利用程序中的输入数据，使缓冲区溢出
+后，前面的填充内容为任意数据，紧接着覆盖返回地址的是jmp esp指令
+的地址，再接着覆盖与返回地址相邻的高地址位置并写入shellcode代码。
+
+
+第三步，函数调用完成后函数返回，根据返回地址中指向的jmp esp指令
+的地址去执行jmp esp操作，即跳转到esp寄存器中保存的地址，而函数返
+回后esp中保存的地址是与返回地址相邻的高地址位置，在这个位置保存
+的是shellcode代码，则shellcode代码被执行。
+上述方法使用jmp esp指令做为跳板，实现了在栈帧动态分配
+的情况下，可以自动跳回shellcode的地址并执行。
+
+
+对于查找jmp esp的指令地址，可以在系统常用的user32.dll等动态链接库，
+或者其他被所有程序都加载的模块中查找，这些动态链接库或者模块加载
+的基地址始终是固定的。
+虽然采用了ASLR技术，高版本windows系统有很多并没有受到ASLR保护
+的动态链接库或者系统函数，可以用来查找固定不变的jmp esp等指令。
+    以jmp esp做为跳板定位shellcode的内存地址示意图见下图。
+
+                          ……
+
+   局部变量n                 NOP
+     ……                             ……
+                         NOP
+                                   jmp esp
+   局部变量1                 NOP
+                                    ……
+ 前一个栈帧指针                 NOP
+
+   返回地址             覆盖后的返回地址
+
+    实参1                Shellcode    esp
+     ……                Shellcode
+
+    实参n                Shellcode
+
+    ……                 Shellcode
+
+    溢出前                 溢出后
+
+
+除了jmp esp之外，mov eax,esp和jmp eax等指令序列也可以实现进入栈区的功能。
+#include <stdio.h>                                        for(position = 0 ; !done_flag ; position++)
+#include <windows.h>                                        {
+#define DLL_NAME "user32.dll" //此处定义需要查找的dll名字               __try
+                                                             {
+int main()                                                    if(ptr[position] == 0xFF && ptr[position+1] == 0xE4)
+{                                                         //jmp esp 的机器码为 E4FF
+ BYTE *ptr;                                                   {
+ int position,address;                                         address = (int)ptr + position;
+ HINSTANCE handle;                                             printf("jmp esp found at 0x%x\n",address);
+ BOOL done_flag = FALSE;                                      }
+handle = LoadLibraryA(DLL_NAME); //LoadLibraryA 是调用dll的
+                                                             }
+                                                             __except(2)
+函数名
+                                                             {
+ if(!handle) //若没找到则进入该if
+                                                              address = (int)ptr + position;
+ {
+                                                              printf("END of 0x%x\n",address);
+    printf(" load dll error!");
+                                                              done_flag = TRUE;
+    getchar();                                               }
+    return 0;                                               }
+ }                                                          getchar();
+ ptr = (BYTE*)handle;                                       return 0;
+ printf("start at 0x%x\n",handle);                         }
+
+                                  通过上述程序运行就可以得到很多jmp esp的指令地址—XP下有效（没有ASLR）
+3   内存喷洒技术
+
+    有些特殊的软件漏洞，不支持或者不能实现精确定位shellcode。同时，
+    存在漏洞的软件其加载地址动态变化，采用shellcode的静态地址覆盖
+    方法难以实施。由于堆分配地址随机性较大，为了解决shellcode在堆
+    中的定位以便触发，可以采用heap spray的方法。
+
+    内存喷射技术的代表是堆喷洒Heap spray，也称为堆喷洒技术，是在shellcode
+    的前面加上大量的滑板指令（slide code），组成一个非常长的注入代码段。然
+    后向系统申请大量内存，并且反复用这个注入代码段来填充。这样就使得内存空
+    间被大量的注入代码所占据。攻击者再结合漏洞利用技术，只要使程序跳转到堆
+    中被填充了注入代码的任何一个地址，程序指令就会顺着滑板指令最终执行到
+    shellcode代码。
+   滑板指令
+
+
+滑板指令（slide code）是由大量NOP(no-operation)空指令0x90填充组成
+的指令序列，当遇到这些NOP指令时，CPU指令指针会一个指令接一个指
+令的执行下去，中间不做任何具体操作，直到“滑”过最后一个滑板指令
+后，接着执行这些指令后面的其他指令，往往后面接着的是shellcode代码。
+
+
+
+随着一些新的攻击技术的出现，滑板指令除了利用NOP指令填充外，也逐
+渐开始使用更多的类NOP指令，譬如0x0C，0x0D（回车、换行）等。
+Heap Spray技术通过使用类NOP指令来进行覆盖，对shellcode地址的跳转准确
+性要求不高了，从而增加了缓冲区溢出攻击的成功率。然而，Heap Spray会导致
+被攻击进程的内存占用非常大，计算机无法正常运转，因而容易被察觉。
+
+
+   它一般配合堆栈溢出攻击，不能用于主动攻击，也不能保证成功。
+
+
+
+
+针对Heap Spray，对于windows系统比较好的系统防范办法是开启DEP功能，即使被绕过，被
+利用的概率也会大大降低。
+单选题   1分
+
+
+
+
+      下列不可以作为跳板的指令是
+
+
+
+       A   Jmp esp
+
+       B   Mov eax, esp; jmp eax
+
+       C   Mov eax, ebp; jmp ebp
+
+
+
+                                   提交
+知识点八：API函数自搜索技术
+                           API函数自搜索技术
+
+前面的Shellcode都采用硬编址的方式来调用相应API函数。首先，获取所
+要使用函数的地址，然后将该地址写入ShellCode，从而实现调用。如果系
+统版本变了，很多函数的地址往往会发生变化，那么调用肯定就会失败了。
+编写通用shellcode，shellcode自身就必须具备动态的自动搜索所需API函数
+地址的能力，即API函数自搜索技术。
+以 MessageBoxA 函 数 的 调 用 的 shellcode 为 例 ， 来 解 释 通 用 型 shellcode 的 编 写 逻 辑 。
+ MessageBoxA位于user32.dll中，用于弹出消息框。
+ LoadLibraryA位于kernel32.dll中，用于加载user32.dll。
+               通用型Shellcode的编写逻辑
+
+调用MessageBoxA函数，应该先使用LoadLibrary(“user32.dll”) 装载
+user32.dll。定位LoadLibrary函数的步骤如下：
+Ø 第一步：定位kernel32.dll。
+Ø 第二步：解析kernel32.dll的导出表
+Ø 第三步：搜索定位LoadLibrary等目标函数。
+Ø 第四步：基于找到的函数地址，完成Shellcode的编写。
+难点在于第一步到第三步，即如何实现API函数自搜索。
+所有的Win32程序都会自动加载ntdll.dll以及kernel32.dll这两个最基础的动态链接
+库，接下来，我们看看怎么完成对kernel32.dll里的API的搜索。
+                         （1）定位kernel32.dll
+
+[1] 首先通过段选择字FS在内存中找到当前的线程环境块TEB。
+[2] 线程环境块偏移地址为0x30的地址存放着指向进程环境块PEB的指针。
+[3] 进程环境块中偏移地址为0x0c的地方存放着指向PEB_LDR_DATA结构体的
+指针，其中，存放着已经被进程装载的动态链接库的信息。
+[4] PEB_LDR_DATA结构体偏移位置为0x1C的地址存放着指向模块初始化链表
+的头指针 InInitializationOrderModuleList。
+[5] 模块初始化链表InInitializationOrderModuleList中按顺序存放着PE装入运行时
+初始化模块的信息，第一个链表结点是ntdll.dll，第二个链表结点就是kernel32。
+[6] 找到属于kernel32.dll的结点后，在其基础上再偏移0x08就是kernel32.dll在内
+存中的加载基地址。
+                              （1）定位kernel32.dll
+
+上述过程细节读者暂时不需要去深究，如上复杂的操作可以用如下简单的代码来实现：
+
+int main()
+{
+   _asm
+   {
+       mov eax, fs:[0x30] ;PEB的地址
+       mov eax, [eax + 0x0c] ; PEB_LDR_DATA结构体的地址
+       mov esi, [eax + 0x1c] ; InInitializationOrderModuleList地址
+       lodsd
+       mov eax, [eax + 0x08] ;eax就是kernel32.dll的地址
+   }
+   return 0;
+}
+             （2）定位kernel32.dll的导出表
+
+找到了kernel32.dll，由于它也是属于PE文件，那么我们可以根据PE文件的结构
+特征，定位其导出表，进而定位导出函数列表信息，然后进行解析、遍历搜索，
+找到我们所需要的API函数。
+定位导出表及函数列表的步骤如下：
+[7] 从kernel32.dll加载基址算起，偏移0x3c的地方就是其PE头的指针。
+[8] PE头偏移0x78的地方存放着指向函数导出表的指针。
+[9] 获得导出函数偏移地址（RVA）列表、导出函数名列表：
+• 导出表偏移0x1c处的指针指向存储导出函数偏移地址（RVA）的列表。
+• 导出表偏移0x20处的指针指向存储导出函数函数名的列表。
+                    （2）定位kernel32.dll的导出表
+
+定位导出表及函数列表，可以用如下简单的代码来实现：
+
+
+mov ebp, eax                      //将kernel32.dll基地址赋值给ebp
+mov       eax,[ebp+0x3C]       //dll的PE头的指针（相对地址）
+mov       ecx,[ebp+eax+0x78]      //导出表的指针（相对地址）
+add       ecx,ebp              // 得到导出表的内存地址
+mov       ebx,[ecx+0x20]          //导出函数名列表指针
+add       ebx,ebp               //导出函数名列表指针的基地址
+               （3）搜索定位目标函数
+
+
+可以通过遍历两个函数相关列表，算出所需函数的入口地址：
+Ø 函数的RVA地址和名字按照顺序存放在上述两个列表中，可以在名称列
+ 表中定位到所需的函数是第几个，然后在地址列表中找到对应的RVA。
+Ø 获得RVA后，再加上前边已经得到的动态链接库的加载地址，就获得了
+ 所需API此刻在内存中的虚拟地址，这个地址就是最终在ShellCode中调
+ 用时需要的地址。
+按照这个方法，就可以获得kernel32.dll中的任意函数。
+                 1. 定位Kenerl32.dll
+
+
+
+
+                 2. 定位导出表及函数列表
+
+
+
+
+3. 遍历函数列表、定位函数
+完整API函数自搜索代码。基于上述流程找到函数的入口地址，
+
+之后就可以编写自己的shellcode，如课本示例5-11，各位同学
+
+还需要自行阅读了解代码的工作原理。
+                           完整的通用型Shellcode
+
+  基于上面提到的自定义API搜索技术，可以在找到函数入口地址之后，进行利用。
+int main(){                                 //======压入"user32.dll"
+   __asm {                                      mov            bx,0x3233
+     CLD               //清空标志位DF                push ebx       //"\0 32"
+     push 0x1E380A6A                            push 0x72657375        //"user"
+//压入MessageBoxA的hash-->user32.dll               push esp      2. 保存user32.dll字符串地址
+     push 0x4FD18963                            xor            edx,edx      //edx=0
+//压入ExitProcess的hash-->kernel32.dll          //======找kernel32.dll的基地址
+     push 0x0C917432                            mov            ebx,fs:[edx+0x30]
+//压入LoadLibraryA的hash-->kernel32.dll        //[TEB+0x30]-->PEB
+     mov esi,esp                                mov            ecx,[ebx+0xC]
+ //esi=esp,指向堆栈中存放LoadLibraryA的地址           //[PEB+0xC]--->PEB_LDR_DATA
+     lea edi,[esi-0xc]                          mov            ecx,[ecx+0x1C]
+//空出8字节应该是为了兼容性 1. ESI保存三个哈希值地址                 mov            ecx,[ecx]
+     //======开辟一些栈空间                        //进入链表第一个就是ntdll.dll
+     xor             ebx,ebx                    mov            ebp,[ecx+0x8]
+     mov             bh,0x04                //ebp= kernel32.dll的基地址
+     sub             esp,ebx //esp-=0x400
+                                                     3. EBP保存kernel32.dll基地址
+ //======是否找到了自己所需全部的函数         依次取入栈的函数哈希                     //======函数名的hash运算
+find_lib_functions:          最后一个是MessageBoxA                  hash_loop:
+     lodsd //即mov eax,[esi],esi+=4, 第一次取LoadLibraryA的hash          movsx eax,byte ptr[esi]
+                                                                   cmp al,ah          //字符串结尾就跳出当前函数
+     cmp eax,0x1E380A6A         //与MessageBoxA
+                                     MessageBoxA？的hash比较
+                                      （最后一个）                       jz     compare_hash
+     jne find_functions //如果没有找到最后一个函数，继续找                         ror edx,7
+     xchg                                                          add edx,eax
+     call [edi-0x8] //LoadLibraryA("user32") |                     inc    esi
+     xchg eax,ebp            6. 是,将执行Loadlibrary(user32.dll）       jmp hash_loop
+ //ebp=userl32.dll基地址,eax=MessageBoxA的hash <-- |
+ 3.不是                                                          //======比较找到的当前函数的hash是否是自己想找的
+    //======导出函数名列表指针                                          compare_hash:
+                                                                   cmp edx,[esp+0x1C] //栈+1c4. 如果不是要找的函数，跳
+                                                                                               为LoadLibraryA的hash
+find_functions:
+                                                                   jnz  next_function_loop      转到前面继续判断
+    pushad             //保护寄存器                                     mov ebx,[ecx+0x24] //ebx = 顺序表的相对偏移量
+    mov eax,[ebp+0x3C]        //dll的PE头                            add ebx,ebp       //顺序表的基地址
+    mov ecx,[ebp+eax+0x78] //导出表的指针                                mov di,[ebx+2*edi] //匹配函数的序号
+    add ecx,ebp //ecx=导出表的基地址                                      mov ebx,[ecx+0x1C] //地址表的相对偏移量
+    mov ebx,[ecx+0x20]//导出函数名列表指针                                  add ebx,ebp       //地址表的基地址
+    add ebx,ebp //ebx=导出函数名列表指针的基地址                                add ebp,[ebx+4*edi] //函数的基地址
+    xor edi,edi                                                    xchg eax,ebp      //eax<==>ebp 交换
+//======找下一个函数名                                                   pop edi
+next_function_loop:                                               stosd                    5. 找到了存到EDI寄存器位置，
+                                                                                 //把找到的函数保存到          edi的位置
+    inc edi                                                                                如果不是最后一个，跳转到前面
+                                                                  push edi                  find_lib_functions位置继续
+    mov esi,[ebx+edi*4] //从列表数组中读取函数名                             popad          //一次性完成多个寄存器状态保存和恢复
+    add esi,ebp      //esi = 函数名称所在地址                             cmp eax,0x1e380a6a //找到函数MessageBox后，跳出循环
+    cdq             //edx = 0                                     jne   find_lib_functions
+ //======让他做些自己想做的事
+function_call:
+     xor           ebx,ebx                       这个完整的代码，实现了MessageBox弹窗
+     push ebx
+     push 0x74736577                             的功能，而且可以在任意系统里执行。
+     push 0x74736577 //push "westwest"
+     mov           eax,esp
+     push ebx                                    前面将找到的函数地址保存到了EDI所保存
+     push eax
+                                                 的地址区域，是按照前面依次入栈的顺序，
+     push eax
+     push ebx                                    即MessageBox、ExitProcess和Loadlibrary的
+     call [edi-0x04]
+//MessageBoxA(NULL,"westwest","westwest",NULL)   入口地址。
+     push ebx
+     call [edi-0x08]    //ExitProcess(0);
+     nop                                         整个Shellcode用nop指令作为结束。
+     nop                                         之后，可以用上述Shellcode提取方式来得
+     nop
+     nop                                         到对应的机器码。
+   }
+   return 0;
+}
+知识点十：绕过其它安全防护
+漏洞又称为脆弱性，本书的⼀个观点就是只要有不健壮的地⽅，就存在被利用的可
+能。正所谓道⾼⼀尺、魔⾼⼀丈，接下来，我们简要介绍对于GS安全机制、ASLR
+机制、SEH保护机制等安全防护策略的绕过策略。
+
+1   绕过GS安全机制
+
+Visual Studio在实现GS安全机制的时候，除了增加Cookie，还会对栈中变量进
+行重新排序，比如：将字符串缓冲区分配在栈帧的最高地址上，因此，当字符串
+缓冲区溢出，就不能覆盖本地变量了。
+但是，考虑到效率问题，它仅按照函数隐患及危害程度进行选择性保护，因此有
+一部分函数可能没有得到有效的保护。比如：结构成员因为互操作性问题而不能
+重新排列，因此当它们包含缓冲区时，这个缓冲区溢出就可以将之后其它成员覆
+盖和控制。
+1   绕过GS安全机制
+
+
+正是因为GS安全机制存在这些缺陷，所以聪明的攻击者构造出了各种办法来绕过
+GS保护机制。David Litchfield在2003年提出了一个技术来绕过GS保护机制：如
+果Cookie被一个不同的值覆盖了，代码会检查是否安装了安全处理例程，如果没
+有，系统的异常处理器就将接管它。
+如果黑客覆盖掉了一个异常处理结构，并在Cookie被检查前触发一个异常，这时
+栈中虽然仍然存在Cookie，但是还是可以被成功溢出。这个方法相当于是利用
+SEH进行漏洞攻击。可以说，GS安全机制最重要的一个缺陷是没有保护异常处理
+器，但这点上虽然有SEH保护机制作为后盾，但SEH保护机制也是可以被绕过的。
+2   ASLR缺陷和绕过方法
+
+ASLR通过增加随机偏移使得攻击变得非常困难。但是，ASLR技术存在很多脆弱性：
+（1）为了减少虚拟地址空间的碎片，操作系统把随机加载库文件的地址限制为8位，即
+地址空间为256，而且随机化发生在地址前两个最有意义的字节上；
+（2）很多应用程序和DLL模块并没有采用/DYNAMICBASE的编译选项；
+（3）很多应用程序使用相同的系统DLL文件，这些系统DLL加载后地址就确定下来了，
+对于本地攻击，攻击者还是很容易就能获得所需要的地址，然后进行攻击。
+
+
+针对这些缺陷，还有一些其他绕过方法，比如攻击未开启地址随机化的模块（作为跳板）、
+堆喷洒技术、部分返回地址覆盖法等。
+3   SEH保护机制缺陷和绕过方法
+
+
+当一个进程中存在一个不是/SafeSEH编译的DLL或者库文件的时候，整个SafeSEH机制
+就可能失效。因为/SafeSEH编译选项需要.NET的编译器支持，现在仍有大量第三方库和
+程序没有使用该编译器编译或者没有启动/SafeSEH选项。
+目前，较为可行的绕过SafeSEH的方法有：
+p 利用未开启SafeSEH的模块作为跳板绕过：可以在未启用SafeSEH的模块里找一些跳转
+    指令，覆盖SEH函数指针，由于这些指令在未启用SafeSEH的模块里，因此异常触发时，
+    可以执行到这些指令。
+p 利用加载模块之外的地址进行绕过：可以利用加载模块之外的地址，包括从堆中进行绕
+    过或者其他一些特定内存绕过，具体不展开介绍。
+
