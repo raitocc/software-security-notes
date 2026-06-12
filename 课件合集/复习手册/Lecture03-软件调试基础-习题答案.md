@@ -4,29 +4,29 @@
 
 ## A. 基础查表题答案
 
-1. A。PE 是 Windows 平台常见可执行文件格式。
+1. A。PE 是 Windows 平台常见可执行文件格式。B 是 ELF 的平台；C Android 使用 DEX 字节码；D WebAssembly 是浏览器字节码格式。
 
-2. B。`.idata` 是 import data，记录导入相关信息。
+2. B。`.idata` 是 import data，记录导入相关信息。A `.text` 存放机器代码；C `.rsrc` 存放资源；D `.reloc` 存放重定位信息。
 
-3. A。`AddressOfEntryPoint` 记录入口点 RVA。
+3. A。`AddressOfEntryPoint` 记录入口点 RVA。B `ImageBase` 是装载基址；C `SectionAlignment` 是内存对齐粒度；D `NumberOfSections` 在 COFF File Header 中，不在 Optional Header。
 
-4. B。IAT 是 Import Address Table，输入函数地址表。
+4. B。IAT 是 Import Address Table，输入函数地址表。A、C、D 都不是手册中的标准术语。
 
-5. A。OllyDbg 是常见 32 位动态调试器。
+5. A。OllyDbg 是常见 32 位动态调试器。B x64dbg 是 64 位调试器；C IDA Pro 偏静态分析；D GDB 是 Linux 下调试器。
 
-6. A。Strings Window 用于查看字符串，并可结合交叉引用定位代码。
+6. A。Strings Window 用于查看字符串，并可结合交叉引用定位代码。B Names Window 查看全局名称；C Functions Window 查看函数列表；D Imports Window 查看导入表。
 
-7. A。`F7` 是单步步入，`F8` 是单步步过。
+7. A。`F7` 是单步步入（遇到 CALL 会进入子函数），`F8` 是单步步过（遇到 CALL 不进入子函数）。
 
-8. A。课件 PE 注入示例调用 `MessageBoxA` 弹出对话框。
+8. A。课件 PE 注入示例调用 `MessageBoxA` 弹出对话框。B 跳转地址是 `jmp` 指令的目标；C 节名在 Section Table 中；D Strings Window 是 IDA 的窗口名称。
 
-9. 对。PE 可以包含图标、菜单、位图、字体等资源。
+9. 对。PE 可以包含图标、菜单、位图、字体等资源，存放在 `.rsrc` 节。
 
-10. 对。用户态调试器通常看到虚拟地址。
+10. 对。用户态调试器通常看到虚拟地址。虚拟地址到物理地址的转换由 MMU 和页表完成，用户态程序没有直接访问物理地址的权限。
 
-11. 对。IDA Graph View 用基本块和箭头表示函数控制流。
+11. 对。IDA Graph View 用基本块和箭头表示函数控制流，Yes 分支通常为绿色，No 分支通常为红色。
 
-12. 对。写入代码后，还需要修改入口点或跳转逻辑，让控制流执行到它。
+12. 对。写入代码后，还需要修改入口点或跳转逻辑，让控制流执行到它。单纯写入代码不会自动被执行。
 
 13. `Portable Executable`。
 
@@ -36,21 +36,21 @@
 
 16. `F5`。
 
-17. `0`。
+17. `0`。`XOR EAX, EAX` 是将 EAX 与自身异或，结果为 0。
 
 ## B. 理解应用题答案
 
-18. A。Loader 会先解析 PE 结构，再映射 section，解析导入表/IAT，最后跳入口点。
+18. A。Loader 会先解析 PE 结构，再映射 section，解析导入表/IAT，最后跳入口点。B 顺序错误，ImageBase 不需要修正；C 入口点不由资源决定；D 不能直接从文件偏移 0 执行。
 
-19. A。DLL 加载地址、系统版本、ASLR 等会影响函数真实地址，因此需要运行时解析并填入 IAT。
+19. A。DLL 加载地址、系统版本、ASLR 等会影响函数真实地址，因此需要运行时解析并填入 IAT。B 这是 Loader 的映射工作；C 虚拟地址到物理地址的转换由 MMU 完成；D 内部函数调用不需要 IAT。
 
-20. A。加壳通常改变入口点，让 loader stub 先执行，再还原或准备原程序。
+20. A。加壳通常改变入口点，让 loader stub 先执行，再还原或准备原程序。B 加壳不替换导入表内容；C 资源节位置不变；D 加壳会改变入口点附近执行逻辑。
 
-21. A。文件中常按文件对齐组织，内存中按页或 SectionAlignment 对齐，因此文件偏移和 RVA 不能直接等同。
+21. A。文件中常按文件对齐组织，内存中按页或 SectionAlignment 对齐，因此文件偏移和 RVA 不能直接等同。B Loader 不会重新排序节区；C 资源节和代码节都按同一对齐标准；D 调试器显示的是虚拟地址，不是物理页偏移。
 
-22. A。IDA 文本视图中虚线箭头通常表示条件跳转。
+22. A。IDA 文本视图中虚线箭头通常表示条件跳转。B 函数调用返回是 `ret` 指令；C 导入函数跳转是间接调用；D 交叉引用用 xref 表示。
 
-23. A。可见字符串常靠近关键逻辑，用它能从输出信息反推分支代码位置。
+23. A。可见字符串常靠近关键逻辑，用它能从输出信息反推分支代码位置。B 导入函数地址与字符串定位无关；C 节表偏移与字符串定位无关；D 入口点地址与字符串定位无关。
 
 24. 对。DLL 实际加载位置决定导入函数真实地址，IAT 会在运行时被填充。
 
@@ -68,7 +68,7 @@
 
 31. `1`。`CMP EAX, EAX` 比较相等，`SETE AL` 将 `AL` 置为 1。
 
-32. PE 文件除了机器码，还包含头部、节表、资源、导入表、导出表、重定位信息等。操作系统需要按 PE 结构解析并映射文件，才能启动程序。
+32. PE 文件除了机器码，还包含头部、节表、资源、导入表、导出表、重定位信息等。操作系统需要按 PE 结构解析并映射文件，才能启动程序。如果只是一串纯机器码，Loader 无法知道代码在哪里、数据在哪里、依赖哪些 DLL。
 
 33. IAT 保存导入函数运行时解析到的真实地址。程序调用外部 API 时，可通过 IAT 间接跳转到对应 DLL 函数，解决不同系统和不同加载地址下函数地址不固定的问题。
 
@@ -90,11 +90,11 @@
 
 41. 因为目标 PE 的导入机制中已有相关 API 信息，Loader 会在运行时解析导入函数并填入 IAT，`call MessageBoxA` 可以通过导入表/IAT 找到真实函数地址。
 
-42. `xor eax, eax` 用于把 `EAX` 清零。
+42. `xor eax, eax` 用于把 `EAX` 清零。这是汇编中常见的清零技巧。
 
-43. 它比较局部变量 `flag` 是否等于 0，也就是比较 `strcmp(password, input)` 的结果是否为 0。
+43. 它比较局部变量 `flag` 是否等于 0，也就是比较 `strcmp(password, input)` 的结果是否为 0。`flag` 存储在 `[ebp-8]` 位置。
 
-44. 当比较结果相等时，零标志满足条件，`sete al` 会把 `AL` 置为 1。
+44. 当比较结果相等时，零标志满足条件，`sete al` 会把 `AL` 置为 1。`sete` 指令在 `ZF=1` 时置位。
 
 45. 可以将相关逻辑改为强制设置返回值，例如写入 `mov al, 01`，再用 `nop` 填充原条件设置指令，使函数总是返回 true。
 
