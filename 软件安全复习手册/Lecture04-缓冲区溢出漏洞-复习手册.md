@@ -1,4 +1,6 @@
-# Lecture04 缓冲区溢出漏洞 - 复习手册
+﻿# Lecture04 缓冲区溢出漏洞 - 复习手册
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 ### 本讲主线
 

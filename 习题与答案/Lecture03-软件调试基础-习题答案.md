@@ -1,4 +1,6 @@
-# Lecture03 软件调试基础 - 习题答案
+﻿# Lecture03 软件调试基础 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture03-软件调试基础-习题.md](Lecture03-软件调试基础-习题.md)
 

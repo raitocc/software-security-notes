@@ -1,4 +1,6 @@
-# Lecture02 堆栈基础和汇编语言 - 复习手册
+﻿# Lecture02 堆栈基础和汇编语言 - 复习手册
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 ### 本讲主线
 

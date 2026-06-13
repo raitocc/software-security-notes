@@ -1,4 +1,6 @@
-# Lecture06 漏洞利用基础 - 复习手册
+﻿# Lecture06 漏洞利用基础 - 复习手册
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 本文件基于课程 PDF 整理，用于考前复习和人工复核。
 

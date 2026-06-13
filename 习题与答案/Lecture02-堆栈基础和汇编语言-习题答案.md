@@ -1,4 +1,6 @@
-# Lecture02 堆栈基础和汇编语言 - 习题答案
+﻿# Lecture02 堆栈基础和汇编语言 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture02-堆栈基础和汇编语言-习题.md](Lecture02-堆栈基础和汇编语言-习题.md)
 

@@ -1,4 +1,6 @@
-# Lecture06 漏洞利用基础 - 习题答案
+﻿# Lecture06 漏洞利用基础 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture06-漏洞利用基础-习题.md](Lecture06-漏洞利用基础-习题.md)
 

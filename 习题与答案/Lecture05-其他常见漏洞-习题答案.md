@@ -1,4 +1,6 @@
-# Lecture05 其他常见漏洞 - 习题答案
+﻿# Lecture05 其他常见漏洞 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture05-其他常见漏洞-习题.md](Lecture05-其他常见漏洞-习题.md)
 

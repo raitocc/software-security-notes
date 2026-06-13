@@ -1,4 +1,6 @@
-# Lecture08 Web 安全 - 习题答案
+﻿# Lecture08 Web 安全 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture08-Web 安全-习题.md](Lecture08-Web 安全-习题.md)
 

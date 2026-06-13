@@ -1,4 +1,6 @@
-# Lecture01 课程概要和基本概念 - 习题
+﻿# Lecture01 课程概要和基本概念 - 习题
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 用法建议：先独立完成本文件，再打开答案文件核对。  
 > 配套答案：[Lecture01-课程概要和基本概念-习题答案.md](Lecture01-课程概要和基本概念-习题答案.md)

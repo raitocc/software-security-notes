@@ -1,4 +1,6 @@
-# Lecture05 其他常见漏洞 - 复习手册
+﻿# Lecture05 其他常见漏洞 - 复习手册
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 ### 本讲主线
 

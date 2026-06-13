@@ -1,4 +1,6 @@
-# Lecture07 漏洞利用防护与漏洞挖掘 - 习题答案
+﻿# Lecture07 漏洞利用防护与漏洞挖掘 - 习题答案
+
+> GitHub: https://github.com/raitocc/software-security-notes
 
 > 对应习题文件：[Lecture07-漏洞利用防护与漏洞挖掘-习题.md](Lecture07-漏洞利用防护与漏洞挖掘-习题.md)
 
