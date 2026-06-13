@@ -1,15 +1,10 @@
-# OS files
-Thumbs.db
-Desktop.ini
-.DS_Store
+# 课件和教材（版权保护，不上传）
+课件合集/
+课后习题/
+课件处理中间文件/
 
-# Editor files
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
-
-# Temporary files
-*.tmp
-*.bak
+# 其他
+*.docx
+*.pdf
+*.pptx
+*.ppt
