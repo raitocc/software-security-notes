@@ -2,8 +2,6 @@
 
 > GitHub: https://github.com/raitocc/software-security-notes
 
-> 本文件基于课程 PDF 整理，用于考前复习和人工复核。
-
 ### 本讲主线
 
 Lecture06 讲 exploit、payload、shellcode 的关系，以及覆盖相邻变量、代码植入、shellcode 编写和编码。它把“漏洞存在”推进到“漏洞如何被利用”。

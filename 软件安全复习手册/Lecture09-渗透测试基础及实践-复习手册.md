@@ -2,8 +2,6 @@
 
 > GitHub: https://github.com/raitocc/software-security-notes
 
-> 本文件基于课程 PDF 整理，用于考前复习和人工复核。
-
 ### 本讲主线
 
 Lecture09 是渗透测试流程和工具基础。它把前面学到的漏洞和利用技术放入授权测试流程中，包括 PTES、Kali、Metasploit、信息收集、主动扫描和实验环境实践。

@@ -2,7 +2,6 @@
 
 > GitHub: https://github.com/raitocc/software-security-notes
 
-> 用法建议：先独立完成本文件，再打开答案文件核对。  
 > 配套答案：[Lecture02-堆栈基础和汇编语言-习题答案.md](Lecture02-堆栈基础和汇编语言-习题答案.md)
 
 ## A. 基础查表题
