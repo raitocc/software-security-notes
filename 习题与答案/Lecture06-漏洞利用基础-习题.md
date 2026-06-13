@@ -1,4 +1,4 @@
-﻿# Lecture06 漏洞利用基础 - 习题
+# Lecture06 漏洞利用基础 - 习题
 
 > GitHub: https://github.com/raitocc/software-security-notes
 
@@ -12,43 +12,43 @@
 
 1. 在课程语境中，exploit 更接近下列哪种含义？
 
-A. 触发漏洞并尝试达成攻击目标的利用方案  
-B. payload 中用于执行功能的一段机器码  
-C. 系统用于记录漏洞编号的数据库条目  
+A. payload 中用于执行功能的一段机器码  
+B. 系统用于记录漏洞编号的数据库条目  
+C. 触发漏洞并尝试达成攻击目标的利用方案  
 D. 编译器插入的栈溢出检测代码
 
 2. 关于 payload 和 shellcode 的关系，下列说法更合理的是：
 
-A. shellcode 可以是 payload 中完成具体功能的机器码片段  
-B. payload 主要用于描述漏洞编号和影响版本范围  
-C. shellcode 主要指厂商发布补丁后的验证脚本  
-D. payload 通常是操作系统用于加载 DLL 的结构体
+A. payload 主要用于描述漏洞编号和影响版本范围  
+B. shellcode 主要指厂商发布补丁后的验证脚本  
+C. payload 通常是操作系统用于加载 DLL 的结构体  
+D. shellcode 可以是 payload 中完成具体功能的机器码片段
 
 3. 下列哪项更接近 shellcode 编码的常见目的？
 
-A. 避开坏字符、字符集限制或简单特征检测  
-B. 让栈帧中的返回地址恢复成原始地址  
+A. 让栈帧中的返回地址恢复成原始地址  
+B. 避开坏字符、字符集限制或简单特征检测  
 C. 把 PE 文件中的资源节转换成导入表  
 D. 自动修复程序中的越界写漏洞
 
 4. `MessageBoxA(hWnd, lpText, lpCaption, uType)` 在 32 位常见调用约定下，参数压栈顺序更接近：
 
-A. `uType`、`lpCaption`、`lpText`、`hWnd`  
-B. `hWnd`、`lpText`、`lpCaption`、`uType`  
-C. `lpText`、`lpCaption`、`uType`、`hWnd`  
-D. `lpCaption`、`lpText`、`hWnd`、`uType`
+A. `hWnd`、`lpText`、`lpCaption`、`uType`  
+B. `lpCaption`、`lpText`、`hWnd`、`uType`  
+C. `uType`、`lpCaption`、`lpText`、`hWnd`  
+D. `lpText`、`lpCaption`、`uType`、`hWnd`
 
 5. 在覆盖相邻变量示例中，字符 `'0'` 与数值 0 的关系更接近：
 
-A. 字符 `'0'` 的字节值是 `0x30`，不等于整数 0  
-B. 字符 `'0'` 写入内存后会自动转换成整数 0  
-C. 四个字符 `'0'` 在内存中通常表示 `0x00000000`  
-D. 字符 `'0'` 会让字符串结束符提前出现，停止后续拷贝
+A. 字符 `'0'` 写入内存后会自动转换成整数 0  
+B. 四个字符 `'0'` 在内存中通常表示 `0x00000000`  
+C. 字符 `'0'` 会让字符串结束符提前出现，停止后续拷贝  
+D. 字符 `'0'` 的字节值是 `0x30`，不等于整数 0
 
 6. 在 Windows shellcode 中，API 函数自搜索主要解决的问题是：
 
-A. 不同系统或 ASLR 下 API 入口地址可能变化  
-B. shellcode 需要把字符串都转换成 Unicode 显示  
+A. shellcode 需要把字符串都转换成 Unicode 显示  
+B. 不同系统或 ASLR 下 API 入口地址可能变化  
 C. 函数调用时无法使用栈传递参数  
 D. DEP 会删除 DLL 导出表中的函数名
 
@@ -87,30 +87,30 @@ D. exploit 负责修复漏洞，payload 负责检测漏洞是否已经公开
 
 16. 覆盖注册机示例中的 `flag`，为什么可能绕过验证？
 
-A. 主程序把 `verify` 返回 0 理解为验证通过，覆盖 `flag` 可改变返回值  
-B. `flag` 保存的是 `MessageBoxA` 地址，覆盖后会自动加载 user32.dll  
-C. `flag` 保存的是返回地址附近的旧 EBP，覆盖后会改变栈帧恢复过程  
+A. `flag` 保存的是 `MessageBoxA` 地址，覆盖后会自动加载 user32.dll  
+B. `flag` 保存的是返回地址附近的旧 EBP，覆盖后会改变栈帧恢复过程  
+C. 主程序把 `verify` 返回 0 理解为验证通过，覆盖 `flag` 可改变返回值  
 D. `flag` 保存的是输入缓冲区长度，覆盖后会让 `strcpy` 停止拷贝
 
 17. 为什么把 `"westwest"` 内容压栈后，后面还要 `push eax`？
 
-A. 前面压入的是字符串内容，后面压入的是字符串首地址作为参数  
-B. 前面压入的是返回地址，后面压入的是 DLL 导出表地址  
-C. 前面压入的是 API 地址，后面压入的是 shellcode 编码 key  
-D. 前面压入的是函数名，后面压入的是 PE 文件节表地址
+A. 前面压入的是返回地址，后面压入的是 DLL 导出表地址  
+B. 前面压入的是 API 地址，后面压入的是 shellcode 编码 key  
+C. 前面压入的是函数名，后面压入的是 PE 文件节表地址  
+D. 前面压入的是字符串内容，后面压入的是字符串首地址作为参数
 
 18. 下列哪项更接近“静态写死 API 地址”的风险？
 
-A. ASLR、系统版本和补丁差异会改变 API 运行时地址  
-B. API 地址写死后，`strcpy` 会自动把地址截断成 1 字节  
+A. API 地址写死后，`strcpy` 会自动把地址截断成 1 字节  
+B. ASLR、系统版本和补丁差异会改变 API 运行时地址  
 C. 写死地址后，参数压栈顺序会从右向左变成从左向右  
 D. Windows 会把硬编码地址自动转换成函数名称字符串
 
 19. 关于异或编码 shellcode，下列说法更合理的是：
 
-A. 编码后需要解码器 stub 在运行时还原真正 shellcode  
-B. 编码后 shellcode 就不再需要控制流跳转到它的位置  
-C. 异或编码主要用于把 API 地址转换成 DLL 基址  
+A. 编码后 shellcode 就不再需要控制流跳转到它的位置  
+B. 异或编码主要用于把 API 地址转换成 DLL 基址  
+C. 编码后需要解码器 stub 在运行时还原真正 shellcode  
 D. 选取异或 key 时不需要考虑编码结果中的坏字符
 
 ### 简答题
