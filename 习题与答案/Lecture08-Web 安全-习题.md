@@ -10,42 +10,42 @@
 
 ### 选择题
 
-1. HTTP 被称为无状态协议，更接近下列哪种含义？
+1. HTTP 被称为无状态协议，更接近下列哪种含义？C
 
 A. 浏览器提交 POST 请求时，请求体会自动进行端到端加密  
 B. Web 服务器处理静态页面时，不需要返回状态码和响应头  
 C. 服务端默认不具备跨请求身份记忆，需要额外机制维护登录态  
 D. 数据库执行 SQL 查询后，会自动保存用户的浏览器会话
 
-2. 关于 Cookie 与 Session 的关系，下列说法更合理的是：
+2. 关于 Cookie 与 Session 的关系，下列说法更合理的是：D
 
 A. Cookie 主要用于保存数据库表结构，Session 主要用于保存网页 HTML 标签  
 B. Cookie 通常由数据库创建，SessionID 通常由浏览器随机生成并提交给服务器  
 C. Cookie 与 Session 都用于替代 HTTPS，因此配置后可省略传输层保护  
 D. Cookie 常存放在客户端，Session 数据通常存放在服务端，客户端携带 SessionID 标识会话
 
-3. OWASP 的全称更接近：
+3. OWASP 的全称更接近：B
 
 A. Online Windows Attack Signature Platform  
 B. Open Web Application Security Project  
 C. Open Wireless Authentication Service Protocol  
 D. Object Web Access Storage Policy
 
-4. WebShell 在课程语境中更接近：
+4. WebShell 在课程语境中更接近：C
 
 A. 浏览器用于渲染 HTML 与 CSS 的安全沙箱组件  
 B. 数据库用于隔离不同用户 SQL 查询结果的事务日志  
 C. 以 Web 脚本形式存在、可通过网页请求控制服务器执行操作的后门环境  
 D. Web 服务器用于压缩图片与静态资源的缓存目录
 
-5. XSS 与 SQL 注入的主要区别更接近：
+5. XSS 与 SQL 注入的主要区别更接近：D
 
 A. XSS 主要攻击数据库索引结构，SQL 注入主要修改浏览器 DOM 节点  
 B. XSS 依赖上传目录脚本执行，SQL 注入依赖 Cookie 设置 HttpOnly  
 C. XSS 与 SQL 注入都围绕 PHP 对象恢复过程中的魔术方法触发  
 D. XSS 让脚本在用户浏览器中执行，SQL 注入改变后端数据库查询语义
 
-6. `sqlmap -u url --tables -D "testdb"` 的作用更接近：
+6. `sqlmap -u url --tables -D "testdb"` 的作用更接近：B
 
 A. 导出 `testdb` 中每个字段的完整数据内容  
 B. 对指定 URL 测试并列举 `testdb` 数据库中的表  
@@ -54,13 +54,13 @@ D. 设置 Cookie 的 domain、path 和 secure 参数
 
 ### 判断题
 
-7. POST 请求的数据放在请求体中，但这不等于加密，也不等于不能被伪造。
+7. POST 请求的数据放在请求体中，但这不等于加密，也不等于不能被伪造。T
 
-8. HttpOnly 可以降低脚本直接读取 Cookie 的风险，但脚本仍可能借当前登录态发起请求。
+8. HttpOnly 可以降低脚本直接读取 Cookie 的风险，但脚本仍可能借当前登录态发起请求。T
 
-9. 远程文件包含在 PHP 中通常与 `allow_url_fopen` 和 `allow_url_include` 的配置有关。
+9. 远程文件包含在 PHP 中通常与 `allow_url_fopen` 和 `allow_url_include` 的配置有关。T
 
-10. PHP 反序列化对象时，`__wakeup()` 属于可能被自动触发的魔术方法。
+10. PHP 反序列化对象时，`__wakeup()` 属于可能被自动触发的魔术方法。T
 
 ### 填空题
 
@@ -78,21 +78,21 @@ D. 设置 Cookie 的 domain、path 和 secure 参数
 
 ### 选择题
 
-15. 关于 `setcookie(name, value, expire, path, domain, secure)`，下列理解更合理的是：
+15. 关于 `setcookie(name, value, expire, path, domain, secure)`，下列理解更合理的是：A
 
 A. `expire` 影响 Cookie 生命周期，`path` 和 `domain` 影响 Cookie 的发送范围  
 B. `secure` 用于指定 Cookie 的数据库字段类型，`path` 用于指定 SQL 表名  
 C. `domain` 表示 Session 数据在服务端保存的位置，`expire` 表示数据库连接超时  
 D. `name` 和 `value` 由浏览器固定生成，服务端主要控制 `secure` 参数
 
-16. 下列哪项更接近“会话保持攻击”？
+16. 下列哪项更接近“会话保持攻击”？C
 
 A. 攻击者把评论内容保存到数据库，使其他用户打开页面时执行脚本  
 B. 攻击者通过单引号破坏 SQL 语法，再观察数据库错误信息  
 C. 攻击者拿到有效 Session 后周期性访问，使服务器延长该会话的可用时间  
 D. 攻击者把压缩包内文件通过 `zip://` 包含进 PHP 解释流程
 
-17. 下面的上传处理方式中，风险更突出的点是：
+17. 下面的上传处理方式中，风险更突出的点是：D
 
 ```php
 $name = $upfile["name"];
@@ -105,21 +105,21 @@ B. 调用了 `move_uploaded_file` 后，PHP 会把图片重新解码并消除脚
 C. 把文件放入 `up/` 目录后，数据库会拒绝后续 SQL 查询请求  
 D. 使用客户端文件名拼接保存路径，且未展示真实类型校验和执行权限隔离
 
-18. `htmlspecialchars($_GET['name'])` 防御 XSS 的关键思路更接近：
+18. `htmlspecialchars($_GET['name'])` 防御 XSS 的关键思路更接近：B
 
 A. 把用户输入保存到 Session 中，使 SQL 查询结构与参数彻底分离  
 B. 把输入中的 HTML 特殊字符编码，降低其被浏览器当作标签或脚本解析的机会  
 C. 把 Cookie 设置为持久 Cookie，降低跨站请求伪造的触发概率  
 D. 把上传文件后缀改成随机字符串，使 Web 服务器无法读取页面内容
 
-19. 关于布尔盲注中 `1' and 1=1 #` 与 `1' and 1=2 #` 的比较，下列说法更合理的是：
+19. 关于布尔盲注中 `1' and 1=1 #` 与 `1' and 1=2 #` 的比较，下列说法更合理的是：C
 
 A. 通过两个请求的图片尺寸差异，判断上传目录是否可执行脚本  
 B. 通过 Cookie 过期时间差异，判断 Session 是否存放在服务端  
 C. 通过真假条件导致的页面差异，判断输入是否改变了 SQL 查询逻辑  
 D. 通过两个 URL 的路径长度差异，判断 PHP 伪协议是否可访问压缩包
 
-20. 关于 `php://filter` 与 `php://input`，下列理解更合理的是：
+20. 关于 `php://filter` 与 `php://input`，下列理解更合理的是：D
 
 A. `php://filter` 用于设置 Cookie 安全属性，`php://input` 用于枚举数据库表  
 B. `php://filter` 主要触发 `__wakeup()`，`php://input` 主要触发 `__toString()`  
